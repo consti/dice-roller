@@ -9,7 +9,7 @@
     function prepare_rnd(callback) {
         if (!random_storage.length && $t.dice.use_true_random) {
             try {
-                $t.rpc({ method: "random", n: 512 }, 
+                $t.rpc({ method: "random", n: 512 },
                 function(random_responce) {
                     if (!random_responce.error)
                         random_storage = random_responce.result.random.data;
@@ -280,11 +280,11 @@
     this.ambient_light_color = 0xf0f5fb;
     this.spot_light_color = 0xefdfd5;
     this.selector_back_colors = { color: 0x404040, shininess: 0, emissive: 0x858787 };
-    this.desk_color = 0xdfdfdf;
+    this.desk_color = '#EFEADF';
     this.use_shadows = true;
 
     this.known_types = ['d4', 'd6', 'd8', 'd10', 'd12', 'd20', 'd100'];
-    this.dice_face_range = { 'd4': [1, 4], 'd6': [1, 6], 'd8': [1, 8], 'd10': [0, 9], 
+    this.dice_face_range = { 'd4': [1, 4], 'd6': [1, 6], 'd8': [1, 8], 'd10': [0, 9],
         'd12': [1, 12], 'd20': [1, 20], 'd100': [0, 9] };
     this.dice_mass = { 'd4': 300, 'd6': 300, 'd8': 340, 'd10': 350, 'd12': 350, 'd20': 400, 'd100': 350 };
     this.dice_inertia = { 'd4': 5, 'd6': 13, 'd8': 10, 'd10': 9, 'd12': 8, 'd20': 6, 'd100': 9 };
@@ -299,7 +299,7 @@
     }
 
     this.create_d6 = function() {
-        if (!this.d6_geometry) this.d6_geometry = this.create_d6_geometry(this.scale * 0.9);
+        if (!this.d6_geometry) this.d6_geometry = this.create_d6_geometry(this.scale * 2);
         if (!this.dice_material) this.dice_material = new THREE.MeshFaceMaterial(
                 this.create_dice_materials(this.standart_d20_dice_face_labels, this.scale / 2, 1.0));
         return new THREE.Mesh(this.d6_geometry, this.dice_material);
@@ -366,7 +366,7 @@
 
     this.stringify_notation = function(nn) {
         var dict = {}, notation = '';
-        for (var i in nn.set) 
+        for (var i in nn.set)
             if (!dict[nn.set[i]]) dict[nn.set[i]] = 1; else ++dict[nn.set[i]];
         for (var i in dict) {
             if (notation.length) notation += ' + ';
@@ -482,12 +482,28 @@
         this.scene.add(this.light);
 
         if (this.desk) this.scene.remove(this.desk);
-        this.desk = new THREE.Mesh(new THREE.PlaneGeometry(this.w * 2, this.h * 2, 1, 1), 
-                new THREE.MeshPhongMaterial({ color: that.desk_color }));
-        this.desk.receiveShadow = that.use_shadows;
-        this.scene.add(this.desk);
 
-        this.renderer.render(this.scene, this.camera);
+        const textureLoader = new THREE.TextureLoader();
+        const deskTexture = textureLoader.load('./desk.jpg', texture => {
+            // Calculate the aspect ratio of the image (square)
+            const imageAspect = texture.image.width / texture.image.height;
+
+            // Update the PlaneGeometry with the new aspect ratio
+            const planeGeometry = new THREE.PlaneGeometry(this.w * 2 * imageAspect, this.h * 2, 1, 1);
+
+            // Create a new MeshPhongMaterial with the new color and texture
+            const deskMaterial = new THREE.MeshPhongMaterial({ color: 0xEFEADF, map: deskTexture });
+
+            // Update the desk with the new geometry and material
+            this.desk = new THREE.Mesh(planeGeometry, deskMaterial);
+            this.desk.receiveShadow = that.use_shadows;
+            this.scene.add(this.desk);
+
+            this.renderer.render(this.scene, this.camera);
+        });
+
+        deskTexture.wrapS = deskTexture.wrapT = THREE.ClampToEdgeWrapping;
+        deskTexture.repeat.set(1, 1);
     }
 
     function make_random_vector(vector) {
@@ -648,7 +664,7 @@
         this.running = false;
         var dice;
         while (dice = this.dices.pop()) {
-            this.scene.remove(dice); 
+            this.scene.remove(dice);
             if (dice.body) this.world.remove(dice.body);
         }
         if (this.pane) this.scene.remove(this.pane);
@@ -725,7 +741,7 @@
 
     this.dice_box.prototype.search_dice_by_mouse = function(ev) {
         var m = $t.get_mouse_coords(ev);
-        var intersects = (new THREE.Raycaster(this.camera.position, 
+        var intersects = (new THREE.Raycaster(this.camera.position,
                     (new THREE.Vector3((m.x - this.cw) / this.aspect,
                                        1 - (m.y - this.ch) / this.aspect, this.w / 9))
                     .sub(this.camera.position).normalize())).intersectObjects(this.dices);
@@ -735,7 +751,7 @@
     this.dice_box.prototype.draw_selector = function() {
         this.clear();
         var step = this.w / 4.5;
-        this.pane = new THREE.Mesh(new THREE.PlaneGeometry(this.w * 6, this.h * 6, 1, 1), 
+        this.pane = new THREE.Mesh(new THREE.PlaneGeometry(this.w * 6, this.h * 6, 1, 1),
                 new THREE.MeshPhongMaterial(that.selector_back_colors));
         this.pane.receiveShadow = true;
         this.pane.position.set(0, 0, 1);

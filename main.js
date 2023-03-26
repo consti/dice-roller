@@ -1,11 +1,9 @@
 "use strict";
 
 function dice_initialize(container) {
-    $t.remove($t.id('loading_text'));
-
     var canvas = $t.id('canvas');
-    canvas.style.width = window.innerWidth - 1 + 'px';
-    canvas.style.height = window.innerHeight - 1 + 'px';
+    canvas.style.width = document.documentElement.clientWidth - 1 + 'px';
+    canvas.style.height = document.documentElement.clientHeight - 1 + 'px';
     var label = $t.id('label');
     var set = $t.id('set');
     var selector_div = $t.id('selector_div');
@@ -69,7 +67,7 @@ function dice_initialize(container) {
         default:
             break;
     }
-    
+
     /*if (params.color == 'white') {
         $t.dice.dice_color = '#808080';
         $t.dice.label_color = '#202020';
@@ -79,13 +77,13 @@ function dice_initialize(container) {
         $t.dice.label_color = '#202020';
     }*/
 
-    var box = new $t.dice.dice_box(canvas, { w: 500, h: 300 });
+    var box = new $t.dice.dice_box(canvas, { w: document.documentElement.clientWidth - 1, h: document.documentElement.clientHeight - 1 });
     box.animate_selector = false;
 
     $t.bind(window, 'resize', function() {
-        canvas.style.width = window.innerWidth - 1 + 'px';
-        canvas.style.height = window.innerHeight - 1 + 'px';
-        box.reinit(canvas, { w: 500, h: 300 });
+        canvas.style.width = document.documentElement.clientWidth - 1 + 'px';
+        canvas.style.height = document.documentElement.clientHeight - 1 + 'px';
+        box.reinit(canvas, { w: document.documentElement.clientWidth - 1, h: document.documentElement.clientHeight - 1 });
     });
 
     function show_selector() {
@@ -116,7 +114,7 @@ function dice_initialize(container) {
             else res += '-' + Math.abs(notation.constant);
             res += ')';
         }
-        if (result.length > 1) res += ' = ' + 
+        if (result.length > 1) res += ' = ' +
                 (result.reduce(function(s, a) { return s + a; }) + notation.constant);
         label.innerHTML = res;
         info_div.style.display = 'inline-block';
@@ -125,29 +123,29 @@ function dice_initialize(container) {
     box.bind_mouse(container, notation_getter, before_roll, after_roll);
     box.bind_throw($t.id('throw'), notation_getter, before_roll, after_roll);
 
-    $t.bind(container, ['mouseup', 'touchend'], function(ev) {
-        ev.stopPropagation();
-        if (selector_div.style.display == 'none') {
-            if (!box.rolling) show_selector();
-            box.rolling = false;
-            return;
-        }
-        var name = box.search_dice_by_mouse(ev);
-        if (name != undefined) {
-            var notation = $t.dice.parse_notation(set.value);
-            notation.set.push(name);
-            set.value = $t.dice.stringify_notation(notation);
-            on_set_change();
-        }
-    });
+    // $t.bind(container, ['mouseup', 'touchend'], function(ev) {
+    //     ev.stopPropagation();
+    //     if (selector_div.style.display == 'none') {
+    //         if (!box.rolling) show_selector();
+    //         box.rolling = false;
+    //         return;
+    //     }
+    //     var name = box.search_dice_by_mouse(ev);
+    //     if (name != undefined) {
+    //         var notation = $t.dice.parse_notation(set.value);
+    //         notation.set.push(name);
+    //         set.value = $t.dice.stringify_notation(notation);
+    //         on_set_change();
+    //     }
+    // });
 
-    if (params.notation) {
-        set.value = params.notation;
-    }
-    if (params.roll) {
+    // if (params.notation) {
+        set.value = "3d6";
+    // }
+    // if (params.roll) {
         $t.raise_event($t.id('throw'), 'mouseup');
-    }
-    else {
-        show_selector();
-    }
+    // }
+    // else {
+    //     show_selector();
+    // }
 }
