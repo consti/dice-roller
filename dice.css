@@ -22,6 +22,7 @@
     bottom: 5px;
     width: inherit;
     padding: 0px;
+    background-color: transparent;
 }
 
 #label {

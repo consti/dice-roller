@@ -395,7 +395,7 @@
         container.appendChild(this.renderer.domElement);
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.PCFShadowMap;
-        this.renderer.setClearColor(0xffffff, 1);
+        this.renderer.setClearColor(0xEFEADF, 1);
 
         this.reinit(container, dimentions);
 
@@ -490,7 +490,7 @@
             const imageAspect = texture.image.width / texture.image.height;
 
             // Create a new MeshPhongMaterial with the image texture
-            const deskImageMaterial = new THREE.MeshPhongMaterial({ map: deskTexture });
+            const deskImageMaterial = new THREE.MeshBasicMaterial({ map: deskTexture });
 
             // Create a new PlaneGeometry with the original image dimensions
             const imagePlaneGeometry = new THREE.PlaneGeometry(texture.image.width, texture.image.height, 1, 1);
