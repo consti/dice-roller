@@ -484,27 +484,35 @@
         if (this.desk) this.scene.remove(this.desk);
 
         const textureLoader = new THREE.TextureLoader();
+        textureLoader.setCrossOrigin('anonymous');
         const deskTexture = textureLoader.load('./desk.jpg', texture => {
             // Calculate the aspect ratio of the image (square)
-            texture.minFilter = THREE.NearestFilter;
             const imageAspect = texture.image.width / texture.image.height;
 
-            // Update the PlaneGeometry with the new aspect ratio
-            const planeGeometry = new THREE.PlaneGeometry(this.w * 2 * imageAspect, this.h * 2, 1, 1);
+            // Create a new MeshPhongMaterial with the image texture
+            const deskImageMaterial = new THREE.MeshPhongMaterial({ map: deskTexture });
 
-            // Create a new MeshPhongMaterial with the new color and texture
-            const deskMaterial = new THREE.MeshPhongMaterial({ color: 0xEFEADF, map: deskTexture });
+            // Create a new PlaneGeometry with the original image dimensions
+            const imagePlaneGeometry = new THREE.PlaneGeometry(texture.image.width, texture.image.height, 1, 1);
 
-            // Update the desk with the new geometry and material
+            // Create a new mesh with the image material and geometry
+            const deskImage = new THREE.Mesh(imagePlaneGeometry, deskImageMaterial);
+
+            // Position the image mesh in the center of the desk
+            deskImage.position.set(0, 0, 0.1);
+
+            // Update the desk with a plain color
+            const planeGeometry = new THREE.PlaneGeometry(this.w * 2, this.h * 2, 1, 1);
+            const deskMaterial = new THREE.MeshPhongMaterial({ color: 0xEFEADF });
+
             this.desk = new THREE.Mesh(planeGeometry, deskMaterial);
             this.desk.receiveShadow = that.use_shadows;
-            this.scene.add(this.desk);
-
-            this.renderer.render(this.scene, this.camera);
+            // Add the image mesh to the scene
+            this.scene.add(deskImage);
         });
 
         deskTexture.wrapS = deskTexture.wrapT = THREE.ClampToEdgeWrapping;
-        deskTexture.repeat.set(1, 1);
+        deskTexture.minFilter = THREE.LinearFilter;
     }
 
     function make_random_vector(vector) {
