@@ -1,5 +1,26 @@
 "use strict";
 
+function handleShakeEvent() {
+    return async function (ev) {
+        const threshold = 20;
+        const acceleration = ev.accelerationIncludingGravity;
+
+        if (Math.abs(acceleration.x) > threshold || Math.abs(acceleration.y) > threshold || Math.abs(acceleration.z) > threshold) {
+            if (!this.rolling) {
+                $t.raise_event($t.id('throw'), 'mouseup')
+            }
+        }
+    };
+}
+
+async function requestDeviceMotionPermission() {
+    if (typeof DeviceMotionEvent.requestPermission === 'function') {
+        const permissionState = await DeviceMotionEvent.requestPermission();
+        return permissionState === 'granted';
+    }
+    return true;
+}
+
 function dice_initialize(container) {
     var canvas = $t.id('canvas');
     canvas.style.width = document.documentElement.clientWidth - 1 + 'px';
@@ -86,12 +107,6 @@ function dice_initialize(container) {
         box.reinit(canvas, { w: document.documentElement.clientWidth - 1, h: document.documentElement.clientHeight - 1 });
     });
 
-    function show_selector() {
-        info_div.style.display = 'none';
-        selector_div.style.display = 'inline-block';
-        box.draw_selector();
-    }
-
     function before_roll(vectors, notation, callback) {
         info_div.style.display = 'none';
         selector_div.style.display = 'none';
@@ -123,7 +138,21 @@ function dice_initialize(container) {
     // box.bind_mouse(container, notation_getter, before_roll, after_roll);
     box.bind_throw($t.id('throw'), notation_getter, before_roll, after_roll);
 
-    $t.bind(info_div, 'mousedown', function(ev) {
+    $t.bind(info_div, 'mousedown', async function(ev) {
+        const deviceMotionSupported = 'DeviceMotionEvent' in window;
+        const permissionGranted = await requestDeviceMotionPermission();
+
+        if (deviceMotionSupported) {
+            if (permissionGranted) {
+                document.getElementById('labelhelp').innerText = "Shake or tap to roll";
+                const shakeHandler = handleShakeEvent().bind(box);
+
+                window.addEventListener('devicemotion', shakeHandler);
+            } else {
+                document.getElementById('labelhelp').innerText = "Tap to roll";
+            }
+        }
+
         ev.stopPropagation();
         $t.raise_event($t.id('throw'), 'mouseup');
     });
@@ -154,3 +183,5 @@ function dice_initialize(container) {
     //     show_selector();
     // }
 }
+
+
