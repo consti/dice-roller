@@ -120,8 +120,13 @@ function dice_initialize(container) {
         info_div.style.display = 'inline-block';
     }
 
-    box.bind_mouse(container, notation_getter, before_roll, after_roll);
+    // box.bind_mouse(container, notation_getter, before_roll, after_roll);
     box.bind_throw($t.id('throw'), notation_getter, before_roll, after_roll);
+
+    $t.bind(info_div, 'mousedown', function(ev) {
+        ev.stopPropagation();
+        $t.raise_event($t.id('throw'), 'mouseup');
+    });
 
     // $t.bind(container, ['mouseup', 'touchend'], function(ev) {
     //     ev.stopPropagation();
@@ -140,10 +145,10 @@ function dice_initialize(container) {
     // });
 
     // if (params.notation) {
-        set.value = "3d6";
+    set.value = "3d6";
     // }
     // if (params.roll) {
-        $t.raise_event($t.id('throw'), 'mouseup');
+    $t.raise_event($t.id('throw'), 'mouseup');
     // }
     // else {
     //     show_selector();

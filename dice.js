@@ -486,6 +486,7 @@
         const textureLoader = new THREE.TextureLoader();
         const deskTexture = textureLoader.load('./desk.jpg', texture => {
             // Calculate the aspect ratio of the image (square)
+            texture.minFilter = THREE.NearestFilter;
             const imageAspect = texture.image.width / texture.image.height;
 
             // Update the PlaneGeometry with the new aspect ratio
